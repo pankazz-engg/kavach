@@ -1,0 +1,21 @@
+{
+    "expo": {
+        "name": "Kavach",
+        "slug": "kavach",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "dark",
+        "android": {
+            "package": "com.kavach.outbreak"
+        },
+        "ios": {
+            "bundleIdentifier": "com.kavach.outbreak"
+        },
+        "plugins": [
+            "expo-notifications"
+        ],
+        "extra": {
+            "apiUrl": "http://localhost:5000"
+        }
+    }
+}
