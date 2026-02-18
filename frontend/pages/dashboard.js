@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import GlowCard from '../components/GlowCard';
 import AlertsTimeline from '../components/AlertsTimeline';
@@ -132,14 +133,19 @@ export default function Dashboard() {
                     </div>
 
                     <div style={{ display: 'flex', gap: 4 }}>
-                        {['Dashboard', 'Alerts', 'Reports', 'Settings'].map(item => (
-                            <button key={item} style={{
+                        {[
+                            { href: '/dashboard', label: 'Overview', active: true },
+                            { href: '/gov', label: 'GOV' },
+                            { href: '/hospital', label: 'Hospital' },
+                            { href: '/community', label: 'Community' },
+                        ].map(item => (
+                            <Link key={item.href} href={item.href} style={{
                                 padding: '5px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500,
-                                background: item === 'Dashboard' ? 'rgba(59,130,246,0.15)' : 'transparent',
-                                border: item === 'Dashboard' ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-                                color: item === 'Dashboard' ? '#60a5fa' : 'rgba(255,255,255,0.5)',
-                                cursor: 'pointer',
-                            }}>{item}</button>
+                                background: item.active ? 'rgba(59,130,246,0.15)' : 'transparent',
+                                border: item.active ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                                color: item.active ? '#60a5fa' : 'rgba(255,255,255,0.5)',
+                                textDecoration: 'none', cursor: 'pointer',
+                            }}>{item.label}</Link>
                         ))}
                     </div>
 
