@@ -87,12 +87,6 @@ export default function CommunityDashboard() {
                     position: 'sticky', top: 0, zIndex: 50,
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                            width: 28, height: 28, borderRadius: 8,
-                            background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, boxShadow: '0 0 16px rgba(245,158,11,0.5)',
-                        }}>⚡</div>
                         <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px' }}>Kavach</span>
                         <span style={{
                             fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20,

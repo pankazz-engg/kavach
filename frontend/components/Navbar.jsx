@@ -12,22 +12,16 @@ export default function Navbar({ alerts = [] }) {
 
     return (
         <header className="h-14 bg-kavach-surface border-b border-kavach-border flex items-center px-6 gap-4 shrink-0 z-10">
-            {/* Logo */}
-            <div className="flex items-center gap-2 mr-6">
-                <div className="w-7 h-7 rounded-lg bg-kavach-accent flex items-center justify-center">
-                    <Activity size={16} className="text-white" />
-                </div>
-                <span className="font-bold text-lg tracking-tight">Kavach</span>
-                <span className="text-kavach-muted text-xs ml-1">AI Outbreak Monitor</span>
-            </div>
+            <span className="font-bold text-lg tracking-tight mr-4">Kavach</span>
+
 
             <nav className="flex gap-1 text-sm">
                 {['Dashboard', 'Alerts', 'Reports', 'Settings'].map((item) => (
                     <button
                         key={item}
                         className={`px-3 py-1.5 rounded-md transition-colors ${item === 'Dashboard'
-                                ? 'bg-kavach-accent/20 text-kavach-accent'
-                                : 'text-kavach-muted hover:text-kavach-text hover:bg-white/5'
+                            ? 'bg-kavach-accent/20 text-kavach-accent'
+                            : 'text-kavach-muted hover:text-kavach-text hover:bg-white/5'
                             }`}
                     >
                         {item}

@@ -121,16 +121,7 @@ export default function Dashboard() {
                     backdropFilter: 'blur(12px)',
                     position: 'sticky', top: 0, zIndex: 50,
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{
-                            width: 28, height: 28, borderRadius: 8,
-                            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, boxShadow: '0 0 16px rgba(59,130,246,0.5)',
-                        }}>⚡</div>
-                        <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px' }}>Kavach</span>
-                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginLeft: 2 }}>AI Outbreak Monitor</span>
-                    </div>
+                    <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.3px' }}>Kavach</span>
 
                     <div style={{ display: 'flex', gap: 4 }}>
                         {[
@@ -205,7 +196,8 @@ export default function Dashboard() {
                                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{kpi.label} (next 48h)</div>
                             </div>
                         </div>
-                    ))}
+                    ))
+                    }
                 </div>
 
                 {/* ── MAIN GRID ──────────────────────────────────────────────────── */}
@@ -217,9 +209,9 @@ export default function Dashboard() {
                 }}>
 
                     {/* ── LEFT SIDEBAR — WARD RISK INDEX ─────────────────────────── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+                    < div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
                         {/* Summary card */}
-                        <div style={{
+                        < div style={{
                             padding: '12px 14px',
                             background: 'rgba(255,255,255,0.03)',
                             border: '1px solid rgba(255,255,255,0.06)',
@@ -228,28 +220,30 @@ export default function Dashboard() {
                             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
                                 Ward Risk Index
                             </div>
-                            {[
-                                { label: 'Wards Monitored', value: KPI.totalWardsMonitored, color: '#60a5fa' },
-                                { label: 'Active Hotspots', value: KPI.activeHotspots, color: '#f97316' },
-                                { label: 'Critical Alerts', value: KPI.criticalAlertsToday, color: '#ef4444' },
-                            ].map(m => (
-                                <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{m.label}</span>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: m.color }}>{m.value}</span>
-                                </div>
-                            ))}
+                            {
+                                [
+                                    { label: 'Wards Monitored', value: KPI.totalWardsMonitored, color: '#60a5fa' },
+                                    { label: 'Active Hotspots', value: KPI.activeHotspots, color: '#f97316' },
+                                    { label: 'Critical Alerts', value: KPI.criticalAlertsToday, color: '#ef4444' },
+                                ].map(m => (
+                                    <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{m.label}</span>
+                                        <span style={{ fontSize: 14, fontWeight: 700, color: m.color }}>{m.value}</span>
+                                    </div>
+                                ))
+                            }
                             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>Top Category</div>
                                 <div style={{ fontSize: 12, fontWeight: 600, color: '#60a5fa' }}>
                                     {CATEGORY_ICON[KPI.topCategory]} {KPI.topCategory.replace('_', ' ')}
                                 </div>
                             </div>
-                        </div>
+                        </div >
 
                         {/* Ward list */}
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 2px' }}>
+                        < div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 2px' }}>
                             Wards by Risk
-                        </div>
+                        </div >
                         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
                             {sortedWards.map(ward => {
                                 const level = getRiskLevel(ward.riskScore);
@@ -280,12 +274,12 @@ export default function Dashboard() {
                                 );
                             })}
                         </div>
-                    </div>
+                    </div >
 
                     {/* ── CENTER — BUBBLE VISUALIZATION + BOTTOM PANEL ───────────── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
+                    < div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0 }}>
                         {/* Bubble cluster */}
-                        <div style={{
+                        < div style={{
                             flex: 1,
                             background: 'rgba(255,255,255,0.02)',
                             border: '1px solid rgba(255,255,255,0.06)',
@@ -295,7 +289,7 @@ export default function Dashboard() {
                             minHeight: 340,
                         }}>
                             {/* Title overlay */}
-                            <div style={{
+                            < div style={{
                                 position: 'absolute', top: 14, left: 16, zIndex: 10,
                                 display: 'flex', alignItems: 'center', gap: 8,
                             }}>
@@ -307,29 +301,31 @@ export default function Dashboard() {
                                 <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600, letterSpacing: '0.05em' }}>
                                     LIVE OUTBREAK INTELLIGENCE
                                 </span>
-                            </div>
+                            </div >
 
                             {/* Legend */}
-                            <div style={{
+                            < div style={{
                                 position: 'absolute', top: 14, right: 14, zIndex: 10,
                                 display: 'flex', gap: 10,
                             }}>
-                                {[['CRITICAL', '#ef4444'], ['HIGH', '#f97316'], ['MEDIUM', '#eab308'], ['LOW', '#22c55e']].map(([l, c]) => (
-                                    <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                        <div style={{ width: 7, height: 7, borderRadius: '50%', background: c, boxShadow: `0 0 6px ${c}88` }} />
-                                        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{l}</span>
-                                    </div>
-                                ))}
-                            </div>
+                                {
+                                    [['CRITICAL', '#ef4444'], ['HIGH', '#f97316'], ['MEDIUM', '#eab308'], ['LOW', '#22c55e']].map(([l, c]) => (
+                                        <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <div style={{ width: 7, height: 7, borderRadius: '50%', background: c, boxShadow: `0 0 6px ${c}88` }} />
+                                            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{l}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div >
 
                             <BubbleHotspotView
                                 onSelectWard={setSelectedWard}
                                 selectedWardId={selectedWard?.wardId}
                             />
-                        </div>
+                        </div >
 
                         {/* Bottom tab panel */}
-                        <div style={{
+                        < div style={{
                             background: 'rgba(255,255,255,0.02)',
                             border: '1px solid rgba(255,255,255,0.06)',
                             borderRadius: 16,
@@ -338,93 +334,99 @@ export default function Dashboard() {
                             display: 'flex', flexDirection: 'column',
                         }}>
                             {/* Tab bar */}
-                            <div style={{
+                            < div style={{
                                 display: 'flex', alignItems: 'center',
                                 borderBottom: '1px solid rgba(255,255,255,0.06)',
                                 padding: '0 12px',
                                 gap: 2, flexShrink: 0,
                             }}>
-                                {tabs.map(tab => (
-                                    <button key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        style={{
-                                            padding: '9px 12px', fontSize: 11, fontWeight: 500,
-                                            background: 'transparent',
-                                            border: 'none',
-                                            borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
-                                            color: activeTab === tab.id ? '#60a5fa' : 'rgba(255,255,255,0.4)',
-                                            cursor: 'pointer', transition: 'all 0.15s',
-                                            marginBottom: -1,
-                                        }}
-                                    >{tab.label}</button>
-                                ))}
-                                {selectedWard && (
-                                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
-                                            {selectedWard.wardId} · {selectedWard.name}
-                                        </span>
-                                        <RiskBadge score={selectedWard.riskScore} />
-                                    </div>
-                                )}
-                            </div>
+                                {
+                                    tabs.map(tab => (
+                                        <button key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            style={{
+                                                padding: '9px 12px', fontSize: 11, fontWeight: 500,
+                                                background: 'transparent',
+                                                border: 'none',
+                                                borderBottom: activeTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
+                                                color: activeTab === tab.id ? '#60a5fa' : 'rgba(255,255,255,0.4)',
+                                                cursor: 'pointer', transition: 'all 0.15s',
+                                                marginBottom: -1,
+                                            }}
+                                        >{tab.label}</button>
+                                    ))
+                                }
+                                {
+                                    selectedWard && (
+                                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
+                                                {selectedWard.wardId} · {selectedWard.name}
+                                            </span>
+                                            <RiskBadge score={selectedWard.riskScore} />
+                                        </div>
+                                    )
+                                }
+                            </div >
 
                             {/* Tab content */}
-                            <div style={{ flex: 1, padding: '12px 14px', overflow: 'hidden' }}>
+                            < div style={{ flex: 1, padding: '12px 14px', overflow: 'hidden' }}>
                                 {activeTab === 'explain' && <ExplainabilityPanel ward={selectedWard} />}
                                 {activeTab === 'forecast' && selectedWard && <ForecastChart ward={selectedWard} />}
                                 {activeTab === 'admission' && <AdmissionChart />}
                                 {activeTab === 'category' && <CategoryDonut />}
-                            </div>
-                        </div>
-                    </div>
+                            </div >
+                        </div >
+                    </div >
 
                     {/* ── RIGHT PANEL ────────────────────────────────────────────── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+                    < div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
                         {/* Selected ward detail */}
-                        {selectedWard && (() => {
-                            const level = getRiskLevel(selectedWard.riskScore);
-                            const col = RISK_COLORS[level];
-                            return (
-                                <div style={{
-                                    padding: '14px',
-                                    background: col.bg,
-                                    border: `1px solid ${col.border}`,
-                                    borderRadius: 14,
-                                    boxShadow: `0 0 24px ${col.glow}`,
-                                    flexShrink: 0,
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                                        <div>
-                                            <div style={{ fontSize: 15, fontWeight: 700 }}>{selectedWard.name}</div>
-                                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
-                                                {selectedWard.wardId} · {selectedWard.city}
+                        {
+                            selectedWard && (() => {
+                                const level = getRiskLevel(selectedWard.riskScore);
+                                const col = RISK_COLORS[level];
+                                return (
+                                    <div style={{
+                                        padding: '14px',
+                                        background: col.bg,
+                                        border: `1px solid ${col.border}`,
+                                        borderRadius: 14,
+                                        boxShadow: `0 0 24px ${col.glow}`,
+                                        flexShrink: 0,
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                                            <div>
+                                                <div style={{ fontSize: 15, fontWeight: 700 }}>{selectedWard.name}</div>
+                                                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
+                                                    {selectedWard.wardId} · {selectedWard.city}
+                                                </div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: 28, fontWeight: 900, color: col.text, lineHeight: 1 }}>
+                                                    {selectedWard.riskScore}%
+                                                </div>
+                                                <div style={{ fontSize: 10, color: col.text, fontWeight: 700 }}>{level}</div>
                                             </div>
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: 28, fontWeight: 900, color: col.text, lineHeight: 1 }}>
-                                                {selectedWard.riskScore}%
-                                            </div>
-                                            <div style={{ fontSize: 10, color: col.text, fontWeight: 700 }}>{level}</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                            {[
+                                                { label: 'Category', value: `${CATEGORY_ICON[selectedWard.category]} ${selectedWard.category.replace('_', ' ')}` },
+                                                { label: 'Population', value: (selectedWard.population / 1000).toFixed(0) + 'K' },
+                                                { label: 'Reports', value: selectedWard.citizenReports },
+                                                { label: 'Anomaly', value: selectedWard.isAnomaly ? '⚡ Yes' : '— No' },
+                                            ].map(m => (
+                                                <div key={m.label} style={{
+                                                    background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '6px 8px',
+                                                }}>
+                                                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{m.label}</div>
+                                                    <div style={{ fontSize: 12, fontWeight: 600, marginTop: 2 }}>{m.value}</div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                                        {[
-                                            { label: 'Category', value: `${CATEGORY_ICON[selectedWard.category]} ${selectedWard.category.replace('_', ' ')}` },
-                                            { label: 'Population', value: (selectedWard.population / 1000).toFixed(0) + 'K' },
-                                            { label: 'Reports', value: selectedWard.citizenReports },
-                                            { label: 'Anomaly', value: selectedWard.isAnomaly ? '⚡ Yes' : '— No' },
-                                        ].map(m => (
-                                            <div key={m.label} style={{
-                                                background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '6px 8px',
-                                            }}>
-                                                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{m.label}</div>
-                                                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 2 }}>{m.value}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })()}
+                                );
+                            })()
+                        }
 
                         {/* Alerts timeline */}
                         <div style={{
@@ -454,11 +456,11 @@ export default function Dashboard() {
                                 <AlertsTimeline />
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div >
+                </div >
 
                 {/* ── FOOTER ─────────────────────────────────────────────────────── */}
-                <div style={{
+                < div style={{
                     padding: '8px 20px',
                     borderTop: '1px solid rgba(255,255,255,0.04)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -482,8 +484,8 @@ export default function Dashboard() {
                             </div>
                         ))}
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
 
             <style>{`
         @keyframes pulse {
