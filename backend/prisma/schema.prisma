@@ -7,116 +7,208 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
-// USER & AUTH
-// ─────────────────────────────────────────────
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  GOV
+  HOSPITAL
+  CITIZEN
+  SUPER_ADMIN
+}
+
+enum SyndromeType {
+  DIARRHEA
+  FEVER
+  VOMITING
+  COUGH
+  RESPIRATORY_DISTRESS
+  SKIN_RASH
+  JAUNDICE
+  HEADACHE
+  UNKNOWN
+}
+
+enum OutbreakCategory {
+  WATERBORNE
+  FOODBORNE
+  AIRBORNE
+  VECTOR_BORNE
+  HOSPITAL_ACQUIRED
+  UNKNOWN
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum RecipientType {
+  GOV
+  HOSPITAL
+  CITIZEN
+  ALL
+}
+
+enum WaterSource {
+  TAP
+  BOREWELL
+  RIVER
+  LAKE
+  OTHER
+}
+
+// ─── USER & AUTH ──────────────────────────────────────────────────────────────
 
 model User {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   email        String   @unique
   passwordHash String
-  role         String   // GOV | HOSPITAL | CITIZEN
+  role         Role     @default(CITIZEN)
   name         String?
-  wardId       String?
+  wardId       String?  @db.ObjectId
+  hospitalId   String?  @db.ObjectId
+  district     String?
   fcmToken     String?
+  isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   citizenReports CitizenReport[]
+  auditLogs      AuditLog[]
+  refreshTokens  RefreshToken[]
 
   @@index([role])
   @@index([wardId])
+  @@index([hospitalId])
+  @@index([isActive])
 }
 
-// ─────────────────────────────────────────────
-// WARD (Geographic Unit)
-// ─────────────────────────────────────────────
+// ─── REFRESH TOKENS ───────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRevoked])
+}
+
+// ─── HOSPITAL ─────────────────────────────────────────────────────────────────
+
+model Hospital {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  wardId    String   @db.ObjectId
+  city      String
+  capacity  Int      @default(0)
+  icuBeds   Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([wardId])
+  @@index([city])
+}
+
+// ─── AUDIT LOGS ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  resource  String?
+  metadata  String?
+  ipAddress String?
+  timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+}
+
+// ─── WARD ─────────────────────────────────────────────────────────────────────
 
 model Ward {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   city       String
   state      String
+  district   String  @default("Delhi")
   latitude   Float
   longitude  Float
   population Int?
 
-  hospitalAdmissions HospitalAdmission[]
-  waterReports       WaterQualityReport[]
-  weatherData        WeatherData[]
-  citizenReports     CitizenReport[]
-  riskPredictions    RiskPrediction[]
-  alerts             Alert[]
-
   @@index([city])
+  @@index([district])
 }
 
-// ─────────────────────────────────────────────
-// SYNDROME MAPPING (Lookup Table)
-// ─────────────────────────────────────────────
+// ─── SYNDROME MAPPING ─────────────────────────────────────────────────────────
 
 model SyndromeMapping {
-  id               String  @id @default(auto()) @map("_id") @db.ObjectId
-  syndromeType     String  // DIARRHEA | FEVER | VOMITING | COUGH | RESPIRATORY_DISTRESS | SKIN_RASH | JAUNDICE | HEADACHE | UNKNOWN
-  outbreakCategory String  // WATERBORNE | FOODBORNE | AIRBORNE | VECTOR_BORNE | HOSPITAL_ACQUIRED | UNKNOWN
-  weight           Float   @default(1.0)
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  syndromeType     SyndromeType
+  outbreakCategory OutbreakCategory
+  weight           Float            @default(1.0)
   description      String?
-
-  @@unique([syndromeType, outbreakCategory])
 }
 
-// ─────────────────────────────────────────────
-// HOSPITAL ADMISSIONS
-// ─────────────────────────────────────────────
+// ─── HOSPITAL ADMISSIONS ──────────────────────────────────────────────────────
 
 model HospitalAdmission {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  wardId           String   @db.ObjectId
-  ward             Ward     @relation(fields: [wardId], references: [id])
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  wardId           String           @db.ObjectId
   hospitalName     String
   reportDate       DateTime
-  syndromeType     String   // SyndromeType enum value
-  outbreakCategory String   // OutbreakCategory enum value
+  syndromeType     SyndromeType
+  outbreakCategory OutbreakCategory @default(UNKNOWN)
   admissionCount   Int
-  severeCount      Int      @default(0)
-  deathCount       Int      @default(0)
+  severeCount      Int              @default(0)
+  deathCount       Int              @default(0)
   ageGroup         String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime         @default(now())
 
   @@index([wardId])
   @@index([syndromeType])
   @@index([reportDate])
 }
 
-// ─────────────────────────────────────────────
-// WATER QUALITY
-// ─────────────────────────────────────────────
+// ─── WATER QUALITY ────────────────────────────────────────────────────────────
 
 model WaterQualityReport {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  wardId         String   @db.ObjectId
-  ward           Ward     @relation(fields: [wardId], references: [id])
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  wardId         String       @db.ObjectId
   reportDate     DateTime
   chlorineLevel  Float
   phLevel        Float
   turbidity      Float
   ecoli          Float?
   totalColiforms Float?
-  source         String?
-  createdAt      DateTime @default(now())
+  source         WaterSource?
+  createdAt      DateTime     @default(now())
 
   @@index([wardId])
   @@index([reportDate])
 }
 
-// ─────────────────────────────────────────────
-// WEATHER DATA
-// ─────────────────────────────────────────────
+// ─── WEATHER DATA ─────────────────────────────────────────────────────────────
 
 model WeatherData {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   wardId      String   @db.ObjectId
-  ward        Ward     @relation(fields: [wardId], references: [id])
   recordedAt  DateTime
   rainfall    Float
   temperature Float
@@ -129,70 +221,58 @@ model WeatherData {
   @@index([recordedAt])
 }
 
-// ─────────────────────────────────────────────
-// CITIZEN REPORTS
-// ─────────────────────────────────────────────
+// ─── CITIZEN REPORTS ──────────────────────────────────────────────────────────
 
 model CitizenReport {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String?  @db.ObjectId
-  user         User?    @relation(fields: [userId], references: [id])
-  wardId       String   @db.ObjectId
-  ward         Ward     @relation(fields: [wardId], references: [id])
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String?      @db.ObjectId
+  user         User?        @relation(fields: [userId], references: [id])
+  wardId       String       @db.ObjectId
   latitude     Float
   longitude    Float
-  syndromeType String
+  syndromeType SyndromeType
   description  String?
-  severity     Int      @default(1)
-  reportedAt   DateTime @default(now())
-  isVerified   Boolean  @default(false)
+  severity     Int          @default(1)
+  reportedAt   DateTime     @default(now())
+  isVerified   Boolean      @default(false)
 
   @@index([wardId])
   @@index([syndromeType])
 }
 
-// ─────────────────────────────────────────────
-// RISK PREDICTIONS (ML Output)
-// ─────────────────────────────────────────────
+// ─── RISK PREDICTIONS ─────────────────────────────────────────────────────────
 
 model RiskPrediction {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  wardId           String   @db.ObjectId
-  ward             Ward     @relation(fields: [wardId], references: [id])
-  predictedAt      DateTime @default(now())
-  forecastHorizon  Int      @default(48)
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  wardId           String           @db.ObjectId
+  predictedAt      DateTime         @default(now())
+  forecastHorizon  Int              @default(48)
   riskScore        Float
-  outbreakCategory String
+  outbreakCategory OutbreakCategory
   confidence       Float
-  isAnomaly        Boolean  @default(false)
-  shapReasons      String   @default("[]")
-  outbreakReasons  String   @default("[]")
+  isAnomaly        Boolean          @default(false)
+  shapReasons      String           @default("[]")
+  outbreakReasons  String           @default("[]")
   rawFeatures      String?
-
-  alerts Alert[]
 
   @@index([wardId])
   @@index([riskScore])
 }
 
-// ─────────────────────────────────────────────
-// ALERTS
-// ─────────────────────────────────────────────
+// ─── ALERTS ───────────────────────────────────────────────────────────────────
 
 model Alert {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  wardId            String   @db.ObjectId
-  ward              Ward     @relation(fields: [wardId], references: [id])
-  predictionId      String?  @db.ObjectId
-  prediction        RiskPrediction? @relation(fields: [predictionId], references: [id])
-  severity          String   // LOW | MEDIUM | HIGH | CRITICAL
-  outbreakCategory  String
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  wardId            String           @db.ObjectId
+  predictionId      String?          @db.ObjectId
+  severity          AlertSeverity
+  outbreakCategory  OutbreakCategory
   message           String
   recommendedAction String?
-  recipientType     String   // GOV | HOSPITAL | CITIZEN | ALL
-  status            String   @default("PENDING") // PENDING | SENT | FAILED
+  recipientType     RecipientType    @default(ALL)
+  status            AlertStatus      @default(PENDING)
   sentAt            DateTime?
-  createdAt         DateTime @default(now())
+  createdAt         DateTime         @default(now())
 
   @@index([wardId])
   @@index([severity])

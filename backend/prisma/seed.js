@@ -32,15 +32,16 @@ async function main() {
     console.log('✅ Syndrome mappings seeded');
 
     // ── Demo Wards (let MongoDB generate IDs) ─────────────────────────────────
+    // ── Demo Wards ─────────────────────────────────────────────────────────────
     const wardDefs = [
-        { name: 'Ward 1 - Dharavi', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0419, longitude: 72.8530, population: 85000 },
-        { name: 'Ward 2 - Kurla', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0726, longitude: 72.8796, population: 72000 },
-        { name: 'Ward 3 - Govandi', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0600, longitude: 72.9200, population: 65000 },
-        { name: 'Ward 4 - Mankhurd', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0440, longitude: 72.9360, population: 58000 },
-        { name: 'Ward 5 - Chembur', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0622, longitude: 72.8990, population: 91000 },
-        { name: 'Ward 6 - Bandra', city: 'Mumbai', state: 'Maharashtra', latitude: 19.0596, longitude: 72.8295, population: 110000 },
-        { name: 'Ward 7 - Andheri', city: 'Mumbai', state: 'Maharashtra', latitude: 19.1136, longitude: 72.8697, population: 145000 },
-        { name: 'Ward 8 - Borivali', city: 'Mumbai', state: 'Maharashtra', latitude: 19.2307, longitude: 72.8567, population: 98000 },
+        { name: 'Ward 1 - Dharavi', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0419, longitude: 72.8530, population: 85000 },
+        { name: 'Ward 2 - Kurla', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0726, longitude: 72.8796, population: 72000 },
+        { name: 'Ward 3 - Govandi', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0600, longitude: 72.9200, population: 65000 },
+        { name: 'Ward 4 - Mankhurd', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0440, longitude: 72.9360, population: 58000 },
+        { name: 'Ward 5 - Chembur', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0622, longitude: 72.8990, population: 91000 },
+        { name: 'Ward 6 - Bandra', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.0596, longitude: 72.8295, population: 110000 },
+        { name: 'Ward 7 - Andheri', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.1136, longitude: 72.8697, population: 145000 },
+        { name: 'Ward 8 - Borivali', city: 'Mumbai', state: 'Maharashtra', district: 'Mumbai', latitude: 19.2307, longitude: 72.8567, population: 98000 },
     ];
 
     // Upsert by name so re-seeding is idempotent
@@ -59,21 +60,45 @@ async function main() {
     const ward3 = wards[2];
     console.log('✅ Demo wards seeded');
 
-    // ── Demo Users ─────────────────────────────────────────────────────────────
-    const passwordHash = await bcrypt.hash('Kavach@2024', 12);
-    const userDefs = [
-        { email: 'gov@kavach.health', role: 'GOV', name: 'BMC Health Officer', wardId: null },
-        { email: 'hospital@kavach.health', role: 'HOSPITAL', name: 'KEM Hospital Admin', wardId: ward1.id },
-        { email: 'citizen@kavach.health', role: 'CITIZEN', name: 'Demo Citizen', wardId: ward1.id },
-    ];
+    // ─────────────────────────────────────────────────────────────
+    // Demo Users
+    // ─────────────────────────────────────────────────────────────
+    const passwordHash = await bcrypt.hash('Gov@123', 12);
+    const adminHash = await bcrypt.hash('Admin@123', 12);
+    const hospitalHash = await bcrypt.hash('Hospital@123', 12);
+    const citizenHash = await bcrypt.hash('Citizen@123', 12);
 
-    for (const u of userDefs) {
-        await prisma.user.upsert({
-            where: { email: u.email },
-            update: {},
-            create: { ...u, passwordHash },
-        });
-    }
+    // SUPER_ADMIN (upserted separately with stronger password)
+    await prisma.user.upsert({
+        where: { email: 'admin@kavach.health' },
+        update: {},
+        create: {
+            email: 'admin@kavach.health',
+            passwordHash: adminHash,
+            role: 'SUPER_ADMIN',
+            name: 'Kavach Platform Admin',
+            isActive: true,
+        },
+    });
+    console.log('✅ SUPER_ADMIN seeded (admin@kavach.health / KavachAdmin@2026)');
+
+    await prisma.user.upsert({
+        where: { email: 'gov@kavach.health' },
+        update: {},
+        create: { email: 'gov@kavach.health', role: 'GOV', name: 'BMC Health Officer', district: 'Mumbai', passwordHash },
+    });
+
+    await prisma.user.upsert({
+        where: { email: 'hospital@kavach.health' },
+        update: {},
+        create: { email: 'hospital@kavach.health', role: 'HOSPITAL', name: 'KEM Hospital Admin', wardId: ward1.id, passwordHash: hospitalHash },
+    });
+
+    await prisma.user.upsert({
+        where: { email: 'citizen@kavach.health' },
+        update: {},
+        create: { email: 'citizen@kavach.health', role: 'CITIZEN', name: 'Demo Citizen', wardId: ward1.id, passwordHash: citizenHash },
+    });
     console.log('✅ Demo users seeded (password: Kavach@2024)');
 
     // ── Demo Hospital Admissions (last 7 days) ─────────────────────────────────
@@ -159,10 +184,26 @@ async function main() {
     }
     console.log('✅ Demo weather data seeded');
 
-    console.log('\n🎉 Seed complete! Demo credentials:');
-    console.log('   GOV:      gov@kavach.health      / Kavach@2024');
-    console.log('   HOSPITAL: hospital@kavach.health / Kavach@2024');
-    console.log('   CITIZEN:  citizen@kavach.health  / Kavach@2024');
+    // ─────────────────────────────────────────────────────────────
+    // Demo Hospitals
+    // ─────────────────────────────────────────────────────────────
+    const hospitalDefs = [
+        { name: 'KEM Hospital', wardId: ward1.id, city: 'Mumbai', capacity: 1800, icuBeds: 120 },
+        { name: 'Sion Hospital', wardId: ward2.id, city: 'Mumbai', capacity: 1200, icuBeds: 80 },
+        { name: 'BYL Nair Hospital', wardId: ward3.id, city: 'Mumbai', capacity: 1500, icuBeds: 95 },
+    ];
+
+    for (const h of hospitalDefs) {
+        const existing = await prisma.hospital.findFirst({ where: { name: h.name } });
+        if (!existing) await prisma.hospital.create({ data: h });
+    }
+    console.log('✅ Demo hospitals seeded');
+
+    console.log('\n🎉 Seed complete! Credentials:');
+    console.log('   SUPER_ADMIN: admin@kavach.health     / Admin@123');
+    console.log('   GOV:         gov@kavach.health       / Gov@123');
+    console.log('   HOSPITAL:    hospital@kavach.health  / Hospital@123');
+    console.log('   CITIZEN:     citizen@kavach.health   / Citizen@123');
 }
 
 main()

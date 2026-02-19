@@ -4,12 +4,18 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 const logger = require('./src/utils/logger');
+const { connectDB } = require('./src/utils/db');   // ← Mongoose connection
 const errorHandler = require('./src/middleware/errorHandler');
+
+// Connect to MongoDB (non-blocking — server starts regardless)
+connectDB();
 
 // Routes
 const authRoutes = require('./src/routes/auth');
+const adminRoutes = require('./src/routes/admin');
 const hospitalRoutes = require('./src/routes/hospital');
 const waterRoutes = require('./src/routes/water');
 const weatherRoutes = require('./src/routes/weather');
@@ -24,7 +30,9 @@ const app = express();
 // ─── Security Middleware ───────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000']
+    : true,   // Allow all origins in development (Expo Go uses dynamic LAN IPs)
   credentials: true,
 }));
 
@@ -36,9 +44,10 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// ─── Body Parsing ──────────────────────────────────────────────────────────
+// ─── Body Parsing + Cookies ───────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ─── Logging ───────────────────────────────────────────────────────────────
 app.use(morgan('combined', {
@@ -57,6 +66,7 @@ app.get('/health', (req, res) => {
 
 // ─── API Routes ────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/hospital', hospitalRoutes);
 app.use('/api/water', waterRoutes);
 app.use('/api/weather', weatherRoutes);

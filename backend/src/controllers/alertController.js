@@ -65,3 +65,19 @@ exports.updateStatus = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.myWard = async (req, res, next) => {
+    try {
+        const wardId = req.user?.wardId;
+        if (!wardId) return res.status(400).json({ error: 'No ward assigned to your account' });
+
+        const alerts = await prisma.alert.findMany({
+            where: { wardId },
+            orderBy: { createdAt: 'desc' },
+            take: 30,
+        });
+        res.json(alerts);
+    } catch (err) {
+        next(err);
+    }
+};

@@ -76,8 +76,8 @@ export default function AlertsPage() {
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${filter === f
-                                        ? 'bg-[#3b82f6] text-white'
-                                        : 'bg-[#111827] border border-[#1f2937] text-[#6b7280] hover:text-[#f9fafb]'
+                                    ? 'bg-[#3b82f6] text-white'
+                                    : 'bg-[#111827] border border-[#1f2937] text-[#6b7280] hover:text-[#f9fafb]'
                                     }`}
                             >
                                 {f}
@@ -133,7 +133,9 @@ export default function AlertsPage() {
                                                     {status.label}
                                                 </span>
                                                 <p className="text-[10px] text-[#6b7280] mt-1.5">
-                                                    {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })}
+                                                    {(alert.createdAt && !isNaN(new Date(alert.createdAt)))
+                                                        ? formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })
+                                                        : alert.time || 'Recently'}
                                                 </p>
                                             </div>
                                         </div>

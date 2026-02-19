@@ -1,21 +1,57 @@
 {
-    "expo": {
-        "name": "Kavach",
-        "slug": "kavach",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "userInterfaceStyle": "dark",
-        "android": {
-            "package": "com.kavach.outbreak"
-        },
-        "ios": {
-            "bundleIdentifier": "com.kavach.outbreak"
-        },
-        "plugins": [
-            "expo-notifications"
-        ],
-        "extra": {
-            "apiUrl": "http://localhost:5000"
+  "expo": {
+    "name": "Kavach",
+    "slug": "kavach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1220"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kavach.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Kavach uses your location to associate symptom reports with your ward.",
+        "NSLocationAlwaysUsageDescription": "Kavach uses your location to associate symptom reports with your ward."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B1220"
+      },
+      "package": "com.kavach.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#3b82f6",
+          "sounds": []
         }
-    }
+      ],
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Kavach uses your location to associate symptom reports with your ward."
+        }
+      ]
+    ]
+  }
 }

@@ -1,19 +1,28 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Activity, Eye, EyeOff } from 'lucide-react';
 import { login } from '../lib/api';
 
+// Role → route mapping (must match RouteGuard's ROUTE_ROLES, uppercase DB enum values)
 const ROLE_ROUTES = {
+    GOV: '/gov',
+    HOSPITAL: '/hospital',
+    CITIZEN: '/community',
+    SUPER_ADMIN: '/admin',
+    // lowercase fallbacks for legacy demo-mode routing
     gov: '/gov',
     hospital: '/hospital',
     citizen: '/community',
+    admin: '/admin',
 };
 
 const DEMO_CREDS = {
-    gov: { email: 'gov@kavach.health', password: 'Kavach@2024', role: 'gov' },
-    hospital: { email: 'hospital@kavach.health', password: 'Kavach@2024', role: 'hospital' },
-    citizen: { email: 'citizen@kavach.health', password: 'Kavach@2024', role: 'citizen' },
+    gov: { email: 'gov@kavach.health', password: 'Gov@123', role: 'gov' },
+    hospital: { email: 'hospital@kavach.health', password: 'Hospital@123', role: 'hospital' },
+    citizen: { email: 'citizen@kavach.health', password: 'Citizen@123', role: 'citizen' },
+    admin: { email: 'admin@kavach.health', password: 'Admin@123', role: 'admin' },
 };
 
 export default function LoginPage() {
@@ -31,15 +40,17 @@ export default function LoginPage() {
         try {
             const data = await login(email, password);
             if (typeof window !== 'undefined') {
-                localStorage.setItem('kavach_token', data.token);
+                localStorage.setItem('kavach_access_token', data.token);
                 localStorage.setItem('kavach_user', JSON.stringify(data.user));
             }
-            const role = data.user?.role || 'gov';
-            router.push(ROLE_ROUTES[role] || '/dashboard');
+            const role = data.user?.role || 'GOV';
+            const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+            router.push(returnTo || ROLE_ROUTES[role] || '/dashboard');
         } catch {
-            // Demo mode: route by email prefix when backend is offline
+            // Demo mode: route by email prefix when backend is offline / DB not connected
             const matchedRole = Object.keys(DEMO_CREDS).find(r => DEMO_CREDS[r].email === email);
             if (matchedRole) {
+                // In demo mode, skip RouteGuard by not using stored tokens
                 router.push(ROLE_ROUTES[matchedRole]);
             } else {
                 setError('Invalid credentials. Use a demo button below to log in.');
@@ -56,6 +67,16 @@ export default function LoginPage() {
     };
 
     const quickLogin = (role) => {
+        // Demo mode: store role in sessionStorage so RouteGuard allows navigation
+        const demoRoleMap = {
+            gov: 'GOV',
+            hospital: 'HOSPITAL',
+            citizen: 'CITIZEN',
+            admin: 'SUPER_ADMIN',
+        };
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('kavach_demo_role', demoRoleMap[role] || 'CITIZEN');
+        }
         router.push(ROLE_ROUTES[role]);
     };
 
@@ -144,12 +165,33 @@ export default function LoginPage() {
 
                         {/* Demo credentials */}
                         <div className="mt-6 pt-6 border-t border-white/[0.06]">
-                            <p className="text-xs text-[#6b7280] text-center mb-3">Quick demo access (no backend required)</p>
+                            <p className="text-xs text-[#6b7280] text-center mb-4 uppercase tracking-widest font-bold">Demo Access Credentials</p>
+
+                            <div className="bg-[#0B1220] border border-white/[0.05] rounded-xl p-3 mb-6 space-y-2">
+                                {[
+                                    { role: 'Admin', email: 'admin@kavach.health', pass: 'Admin@123' },
+                                    { role: 'Gov', email: 'gov@kavach.health', pass: 'Gov@123' },
+                                    { role: 'Hospital', email: 'hospital@kavach.health', pass: 'Hospital@123' },
+                                    { role: 'Citizen', email: 'citizen@kavach.health', pass: 'Citizen@123' },
+                                ].map((cred) => (
+                                    <div key={cred.role} className="flex justify-between items-center text-[10px]">
+                                        <span className="text-[#9ca3af] font-medium">{cred.role}:</span>
+                                        <div className="text-right">
+                                            <code className="text-violet-400">{cred.email}</code>
+                                            <span className="text-[#4b5563] mx-1">/</span>
+                                            <code className="text-blue-400">{cred.pass}</code>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <p className="text-xs text-[#6b7280] text-center mb-3">Or use Quick Login buttons</p>
                             <div className="flex gap-2">
                                 {[
                                     { role: 'gov', label: '🗺️ GOV', color: 'text-violet-400 border-violet-500/30 bg-violet-500/10', hoverColor: 'hover:bg-violet-500/20' },
                                     { role: 'hospital', label: '🏥 HOSPITAL', color: 'text-green-400 border-green-500/30 bg-green-500/10', hoverColor: 'hover:bg-green-500/20' },
                                     { role: 'citizen', label: '👥 CITIZEN', color: 'text-amber-400 border-amber-500/30 bg-amber-500/10', hoverColor: 'hover:bg-amber-500/20' },
+                                    { role: 'admin', label: '⚙️ ADMIN', color: 'text-red-400 border-red-500/30 bg-red-500/10', hoverColor: 'hover:bg-red-500/20' },
                                 ].map(({ role, label, color, hoverColor }) => (
                                     <button
                                         key={role}
@@ -160,7 +202,16 @@ export default function LoginPage() {
                                     </button>
                                 ))}
                             </div>
-                            <p className="text-[10px] text-[#4b5563] text-center mt-2">Click a role to enter demo mode directly</p>
+                        </div>
+
+                        {/* Sign up link */}
+                        <div className="mt-4 pt-4 border-t border-white/[0.04] text-center">
+                            <p className="text-[#6b7280] text-sm">
+                                New here?{' '}
+                                <Link href="/signup" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+                                    Create a citizen account
+                                </Link>
+                            </p>
                         </div>
                     </div>
 

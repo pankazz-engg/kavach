@@ -11,6 +11,7 @@ const ctrl = require('../controllers/riskController');
 
 router.post('/predict', authenticate, authorize('GOV', 'HOSPITAL'), validate(riskPredictSchema), ctrl.predict);
 router.get('/heatmap', authenticate, ctrl.heatmap);
+router.get('/my-ward', authenticate, ctrl.myWard);
 router.get('/', authenticate, ctrl.list);
 router.get('/:wardId', authenticate, ctrl.latestByWard);
 

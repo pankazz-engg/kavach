@@ -5,24 +5,78 @@ import {
     SYMPTOM_TREND, ADVISORIES, generateForecast,
 } from './mockData';
 
+const TOKEN_KEY = 'kavach_access_token';
+const USER_KEY = 'kavach_user';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const ML_URL = process.env.NEXT_PUBLIC_ML_URL || 'http://localhost:8000';
 
-const api = axios.create({ baseURL: API_URL, timeout: 5000 });
-const mlApi = axios.create({ baseURL: ML_URL, timeout: 5000 });
+const api = axios.create({ baseURL: API_URL, timeout: 10000 });
+const mlApi = axios.create({ baseURL: ML_URL, timeout: 10000 });
 
-// Attach JWT from localStorage on every request
+// ── Request: attach JWT ───────────────────────────────────────────────────────
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('kavach_token');
+        const token = localStorage.getItem(TOKEN_KEY);
         if (token) config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
 
+// ── Response: auto-refresh on 401 ────────────────────────────────────────────
+let isRefreshing = false;
+let refreshQueue = [];
+
+api.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+        const original = error.config;
+        if (error.response?.status === 401 && !original._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    refreshQueue.push({ resolve, reject });
+                }).then((token) => {
+                    original.headers.Authorization = `Bearer ${token}`;
+                    return axios(original);
+                });
+            }
+            original._retry = true;
+            isRefreshing = true;
+            try {
+                const r = await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
+                const newToken = r.data.token;
+                localStorage.setItem(TOKEN_KEY, newToken);
+                if (r.data.user) localStorage.setItem(USER_KEY, JSON.stringify(r.data.user));
+                refreshQueue.forEach(({ resolve }) => resolve(newToken));
+                refreshQueue = [];
+                original.headers.Authorization = `Bearer ${newToken}`;
+                return api(original);
+            } catch {
+                refreshQueue.forEach(({ reject }) => reject(error));
+                refreshQueue = [];
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem(USER_KEY);
+                // Only redirect to /login if not in demo mode
+                const inDemoMode = typeof window !== 'undefined' && sessionStorage.getItem('kavach_demo_role');
+                if (typeof window !== 'undefined' && !inDemoMode) {
+                    window.location.href = '/login';
+                }
+            } finally {
+                isRefreshing = false;
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const login = (email, password) =>
     api.post('/api/auth/login', { email, password }).then((r) => r.data);
+
+export const register = (data) =>
+    api.post('/api/auth/register', data).then((r) => r.data);
+
+export { TOKEN_KEY, USER_KEY };
 
 // ── Risk Summary ──────────────────────────────────────────────────────────────
 export async function getRiskSummary() {

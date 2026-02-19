@@ -6,6 +6,7 @@ const ctrl = require('../controllers/alertController');
 
 router.post('/', authenticate, authorize('GOV', 'HOSPITAL'), validate(alertSchema), ctrl.create);
 router.get('/', authenticate, ctrl.list);
+router.get('/my-ward', authenticate, ctrl.myWard);
 router.get('/:wardId', authenticate, ctrl.byWard);
 router.patch('/:id/status', authenticate, authorize('GOV'), ctrl.updateStatus);
 

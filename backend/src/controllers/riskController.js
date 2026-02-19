@@ -132,3 +132,29 @@ exports.latestByWard = async (req, res, next) => {
         next(err);
     }
 };
+
+/**
+ * GET /api/risk/my-ward
+ * Latest prediction for the authenticated user's ward (mobile app)
+ */
+exports.myWard = async (req, res, next) => {
+    try {
+        const wardId = req.user?.wardId;
+        if (!wardId) return res.status(400).json({ error: 'No ward assigned to your account' });
+
+        const prediction = await prisma.riskPrediction.findFirst({
+            where: { wardId },
+            orderBy: { predictedAt: 'desc' },
+            include: { ward: { select: { name: true, city: true, latitude: true, longitude: true } } },
+        });
+        if (!prediction) return res.status(404).json({ error: 'No prediction found for your ward' });
+
+        res.json({
+            ...prediction,
+            shapReasons: JSON.parse(prediction.shapReasons || '[]'),
+            outbreakReasons: JSON.parse(prediction.outbreakReasons || '[]'),
+        });
+    } catch (err) {
+        next(err);
+    }
+};
