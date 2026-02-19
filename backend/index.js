@@ -24,6 +24,8 @@ const riskRoutes = require('./src/routes/risk');
 const alertRoutes = require('./src/routes/alerts');
 const wardRoutes = require('./src/routes/wards');
 const hotspotRoutes = require('./src/routes/hotspots');
+const smsRoutes = require('./src/routes/sms');
+
 
 const app = express();
 
@@ -75,6 +77,8 @@ app.use('/api/risk', riskRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/wards', wardRoutes);
 app.use('/api/hotspots', hotspotRoutes);
+app.use('/api/sms', smsRoutes);
+
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

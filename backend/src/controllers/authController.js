@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { User, RefreshToken, AuditLog } = require('../models');
 const logger = require('../utils/logger');
+const alertService = require('../services/alertService');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ADMIN_ONLY_ROLES = ['GOV', 'HOSPITAL', 'SUPER_ADMIN'];
@@ -42,6 +43,7 @@ const safeUser = (u) => ({
     email: u.email,
     role: u.role,
     name: u.name,
+    phone: u.phone,
     wardId: u.wardId,
     hospitalId: u.hospitalId,
     district: u.district,
@@ -53,7 +55,7 @@ const safeUser = (u) => ({
 
 exports.register = async (req, res, next) => {
     try {
-        const { email, password, role = 'CITIZEN', name, wardId } = req.body;
+        const { email, password, role = 'CITIZEN', name, wardId, phone } = req.body;
 
         if (ADMIN_ONLY_ROLES.includes(role)) {
             return res.status(403).json({ error: `Role '${role}' can only be created by a SUPER_ADMIN.` });
@@ -63,7 +65,7 @@ exports.register = async (req, res, next) => {
         if (existing) return res.status(409).json({ error: 'Email already registered.' });
 
         const passwordHash = await bcrypt.hash(password, 12);
-        const user = await User.create({ email: email.toLowerCase(), passwordHash, role, name, wardId: wardId || undefined });
+        const user = await User.create({ email: email.toLowerCase(), passwordHash, role, name, wardId: wardId || undefined, phone });
 
         const { raw, hash } = await generateRefreshToken();
         await storeRefreshToken(user._id, hash);
@@ -71,6 +73,13 @@ exports.register = async (req, res, next) => {
 
         writeAudit(user._id, 'REGISTER', `User:${user._id}`, { role }, req.ip);
         logger.info(`New user registered: ${email} [${role}]`);
+
+        // Check for active alerts in the user's ward and notify via SMS if phone provided
+        if (user.phone && user.wardId) {
+            alertService.checkAndNotifyUserOfActiveAlert(user).catch(err => 
+                logger.error(`Post-registration alert check failed for ${user.email}: ${err.message}`)
+            );
+        }
 
         res.cookie('refreshToken', raw, COOKIE_OPTS);
         res.status(201).json({ token: accessToken, user: safeUser(user) });
@@ -102,6 +111,13 @@ exports.login = async (req, res, next) => {
 
         writeAudit(user._id, 'LOGIN', `User:${user._id}`, null, req.ip);
         logger.info(`User logged in: ${email} [${user.role}]`);
+
+        // Check for active alerts in the user's ward and notify via SMS if phone provided
+        if (user.phone && user.wardId) {
+            alertService.checkAndNotifyUserOfActiveAlert(user).catch(err => 
+                logger.error(`Post-login alert check failed for ${user.email}: ${err.message}`)
+            );
+        }
 
         res.cookie('refreshToken', raw, COOKIE_OPTS);
         res.json({ token: accessToken, user: safeUser(user) });

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Shield, Eye, EyeOff, User, Mail, Lock, MapPin } from 'lucide-react';
+import { Shield, Eye, EyeOff, User, Mail, Lock, MapPin, Phone } from 'lucide-react';
 import { register } from '../lib/api';
 
 const ROLE_ROUTES = {
@@ -16,7 +16,7 @@ export default function SignupPage() {
     const router = useRouter();
     const [form, setForm] = useState({
         name: '', email: '', password: '', confirm: '',
-        wardId: '',
+        wardId: '', phone: '',
     });
     const [showPw, setShowPw] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -50,6 +50,7 @@ export default function SignupPage() {
                 password: form.password,
                 role: 'CITIZEN',
                 ...(form.wardId && { wardId: form.wardId }),
+                ...(form.phone && { phone: form.phone }),
             };
             const data = await register(payload);
             // Store token + user just like login does
@@ -163,6 +164,26 @@ export default function SignupPage() {
                                         onBlur={e => e.target.style.borderColor = 'rgba(26,46,29,0.9)'}
                                     />
                                 </div>
+                            </div>
+
+                            {/* Phone Number */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#a3c4a8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                    Phone Number <span style={{ color: '#3d5a42', fontWeight: 400 }}>(optional)</span>
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <Phone size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#3d5a42' }} />
+                                    <input
+                                        type="tel"
+                                        value={form.phone}
+                                        onChange={set('phone')}
+                                        placeholder="+919876543210"
+                                        style={{ width: '100%', background: 'rgba(8,15,10,0.8)', border: '1px solid rgba(26,46,29,0.9)', borderRadius: 10, padding: '11px 14px 11px 36px', fontSize: 13, color: '#ecfdf5', outline: 'none', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+                                        onFocus={e => e.target.style.borderColor = 'rgba(132,204,22,0.50)'}
+                                        onBlur={e => e.target.style.borderColor = 'rgba(26,46,29,0.9)'}
+                                    />
+                                </div>
+                                <p style={{ color: '#6b8f72', fontSize: 10, marginTop: 5 }}>E.164 format: +[country][number]</p>
                             </div>
 
                             {/* Password */}

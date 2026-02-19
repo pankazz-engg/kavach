@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { getUser, clearToken } from '../lib/auth';
 import { useEffect, useState } from 'react';
-
+ 
 const SEVERITY_COLOR = {
     CRITICAL: 'text-red-400',
     HIGH: 'text-orange-400',

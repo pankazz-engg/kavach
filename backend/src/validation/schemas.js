@@ -17,6 +17,7 @@ const registerSchema = z.object({
     password: passwordRule,
     role: z.enum(['CITIZEN']).default('CITIZEN'), // self-register citizens only
     name: z.string().min(1).max(100).optional(),
+    phone: z.string().regex(/^\+[1-9]\d{1,14}$/, 'Phone must be in E.164 format (e.g., +919876543210)').optional(),
     wardId: z.string().optional(),
 });
 
@@ -31,6 +32,7 @@ const createUserSchema = z.object({
     password: passwordRule,
     role: z.enum(ROLES),
     name: z.string().min(1).max(100).optional(),
+    phone: z.string().regex(/^\+[1-9]\d{1,14}$/, 'Phone must be in E.164 format (e.g., +919876543210)').optional(),
     wardId: z.string().optional(),
     hospitalId: z.string().optional(),
     district: z.string().optional(),

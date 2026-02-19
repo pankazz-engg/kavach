@@ -73,6 +73,7 @@ model User {
   passwordHash String
   role         Role     @default(CITIZEN)
   name         String?
+  phone        String?
   wardId       String?  @db.ObjectId
   hospitalId   String?  @db.ObjectId
   district     String?
@@ -89,6 +90,7 @@ model User {
   @@index([wardId])
   @@index([hospitalId])
   @@index([isActive])
+  @@index([phone])
 }
 
 // ─── REFRESH TOKENS ───────────────────────────────────────────────────────────

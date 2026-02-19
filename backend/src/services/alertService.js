@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const prisma = require('../utils/prisma');
 const logger = require('../utils/logger');
+const { sendSMS } = require('./twilioServices'); // Fixed: was 'twilioService'
 
 // ── Email Transport (Gmail SMTP) ─────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
@@ -72,6 +73,7 @@ exports.dispatch = async (alert) => {
         await Promise.allSettled([
             sendEmail(alert),
             sendPushNotification(alert),
+            sendSMSNotification(alert),
         ]);
 
         await prisma.alert.update({
@@ -161,6 +163,75 @@ async function sendPushNotification(alert) {
     const response = await firebaseAdmin.messaging().sendEachForMulticast(message);
     logger.info(`Push sent: ${response.successCount}/${tokens.length} delivered`);
 }
+
+// ✅ ADD SMS FUNCTION HERE
+
+async function sendSMSNotification(alert) {
+    try {
+        // Only send SMS for HIGH and CRITICAL alerts
+        if (!['HIGH', 'CRITICAL'].includes(alert.severity)) {
+            logger.info(`Skipping SMS for ${alert.severity} alert (only HIGH/CRITICAL trigger SMS)`);
+            return;
+        }
+
+        const message = `🚨 HIGH ALERT: ${alert.outbreakCategory} detected in your ward\nRisk Level: ${alert.severity}\nRecommended Action: ${alert.recommendedAction || 'Check the Kavach app for details'}`;
+
+        // 1. Send to all users in the affected ward who have phone numbers
+        const users = await prisma.user.findMany({
+            where: { wardId: alert.wardId, phone: { not: null }, role: { in: ['CITIZEN', 'HOSPITAL'] } },
+            select: { phone: true },
+        });
+
+        for (const user of users) {
+            await sendSMS(user.phone, message);
+        }
+
+        if (users.length > 0) {
+            logger.info(`SMS sent to ${users.length} ward users for alert ${alert.id}`);
+        }
+
+        // 2. Always notify the designated recipient (fallback / owner notification)
+        const ownerPhone = process.env.ALERT_RECIPIENT_PHONE;
+        if (ownerPhone) {
+            await sendSMS(ownerPhone, message);
+            logger.info(`Alert SMS also sent to owner phone (${ownerPhone}) for alert ${alert.id}`);
+        }
+    } catch (err) {
+        logger.error(`SMS failed: ${err.message}`);
+    }
+}
+
+/**
+ * Checks if there's a recent HIGH/CRITICAL alert for the user's ward
+ * and sends an SMS notification if one exists.
+ */
+exports.checkAndNotifyUserOfActiveAlert = async (user) => {
+    try {
+        if (!user.wardId || !user.phone) return;
+
+        // Look for active High/Critical alerts in the last 24 hours
+        const activeAlert = await prisma.alert.findFirst({
+            where: {
+                wardId: user.wardId,
+                severity: { in: ['HIGH', 'CRITICAL'] },
+                status: 'SENT',
+                createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        if (activeAlert) {
+            const message = `🚨 HIGH ALERT: ${activeAlert.outbreakCategory} detected in your ward
+Risk Level: ${activeAlert.severity}
+Recommended Action: ${activeAlert.recommendedAction || 'Check the Kavach app for details'}`;
+
+            await sendSMS(user.phone, message);
+            logger.info(`Active risk SMS sent to newly auth'd user: ${user.email} for ward ${user.wardId}`);
+        }
+    } catch (err) {
+        logger.error(`Failed to check/send active alert SMS for user ${user._id}: ${err.message}`);
+    }
+};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

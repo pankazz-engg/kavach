@@ -20,6 +20,7 @@ const userSchema = new Schema({
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ROLES, default: 'CITIZEN' },
     name: { type: String, trim: true },
+    phone: { type: String },
     wardId: { type: Schema.Types.ObjectId, ref: 'Ward' },
     hospitalId: { type: Schema.Types.ObjectId, ref: 'Hospital' },
     district: { type: String },
@@ -29,6 +30,7 @@ const userSchema = new Schema({
 
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ phone: 1 });
 
 // ─── RefreshToken ────────────────────────────────────────────────────────────
 const refreshTokenSchema = new Schema({
