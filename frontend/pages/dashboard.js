@@ -466,7 +466,7 @@ export default function Dashboard() {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                     <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
-                        Kavach AI Outbreak Intelligence · Mumbai Municipal Corporation · v1.0
+                        Kavach AI Outbreak Intelligence · Delhi Municipal Corporation · v1.0
                     </span>
                     <div style={{ display: 'flex', gap: 16 }}>
                         {[

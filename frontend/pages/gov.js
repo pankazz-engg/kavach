@@ -144,7 +144,7 @@ export default function GovDashboard() {
                     <div>
                         <h1 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>District Command Dashboard</h1>
                         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>
-                            Mumbai Municipal Corporation · Real-time outbreak intelligence
+                            Delhi Municipal Corporation · Real-time outbreak intelligence
                         </p>
                     </div>
                     <div style={{
@@ -357,7 +357,7 @@ export default function GovDashboard() {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                     <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
-                        Kavach GOV · Mumbai Municipal Corporation · District Command View
+                        Kavach GOV · Delhi Municipal Corporation · District Command View
                     </span>
                     <div style={{ display: 'flex', gap: 16 }}>
                         {[{ label: 'ML Service', ok: true }, { label: 'Data Feed', ok: true }, { label: 'Alerts', ok: true }].map(s => (

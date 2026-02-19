@@ -401,7 +401,7 @@ export default function HospitalDashboard() {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                     <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
-                        Kavach Hospital · Surge Intelligence · Mumbai Health Network
+                        Kavach Hospital · Surge Intelligence · Delhi Health Network
                     </span>
                     <div style={{ display: 'flex', gap: 16 }}>
                         {[{ label: 'ML Service', ok: true }, { label: 'HMIS Feed', ok: true }, { label: 'Alerts', ok: true }].map(s => (

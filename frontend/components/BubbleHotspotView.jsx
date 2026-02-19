@@ -142,7 +142,7 @@ export default function BubbleHotspotView({ onSelectWard, selectedWardId }) {
 
             {/* Center label */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/20 text-xs tracking-widest uppercase pointer-events-none">
-                Mumbai Outbreak Intelligence
+                Delhi Outbreak Intelligence
             </div>
         </div>
     );
